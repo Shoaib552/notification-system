@@ -4,7 +4,7 @@ Notifier is a production-grade, highly scalable asynchronous mention notificatio
 
 ---
 
-## 🛠️ Architecture & System Design
+##  Architecture & System Design
 
 Below is the complete architectural flow, from a client posting a comment to an asynchronous background worker delivering the notification and executing a distributed real-time push:
 
@@ -53,7 +53,7 @@ Below is the complete architectural flow, from a client posting a comment to an 
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Docker & Docker Compose installed.
@@ -111,7 +111,7 @@ npm run dev
 
 ---
 
-## 🔒 Concurrency, Idempotency & DB Guarantees
+##  Concurrency, Idempotency & DB Guarantees
 
 ### Scenario: 100 Simultaneous POST Requests Mentions `@john`
 
@@ -135,7 +135,7 @@ When Celery workers process duplicate tasks, they perform a standard write (`ins
 
 ---
 
-## 🛡️ API Specification
+##  API Specification
 
 ### Comments
 - **`POST /comments`**: Creates a new comment. Extracted mentions are pushed to workers.
@@ -168,7 +168,7 @@ When Celery workers process duplicate tasks, they perform a standard write (`ins
 
 ---
 
-## 🎨 Premium Visual Experience
+##  Premium Visual Experience
 
 The frontend is custom-styled with a **Vanilla CSS Glassmorphic Dark Theme** featuring:
 - **Micro-Animations**: Real-time pulses for WebSockets connectivity, hover slides, click contractions, and floating toast announcements.
