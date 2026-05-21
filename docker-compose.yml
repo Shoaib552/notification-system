@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # 1. MongoDB Database Service
+  db:
+    image: mongo:6.0
+    container_name: notifier_db
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - notifier_network
+
+  # 2. Redis Message Broker & Key-Value Store
+  redis:
+    image: redis:7-alpine
+    container_name: notifier_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - notifier_network
+
+  # 3. FastAPI REST & WebSocket API Service
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: notifier_api
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://db:27017
+      - DATABASE_NAME=notification_db
+      - REDIS_URI=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+    depends_on:
+      - db
+      - redis
+    networks:
+      - notifier_network
+
+  # 4. Celery Asynchronous Job Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: notifier_worker
+    restart: always
+    command: celery -A app.worker.celery_app worker --loglevel=info
+    environment:
+      - MONGODB_URI=mongodb://db:27017
+      - DATABASE_NAME=notification_db
+      - REDIS_URI=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - LOG_LEVEL=INFO
+    depends_on:
+      - redis
+      - db
+    networks:
+      - notifier_network
+
+  # 5. React SPA Vite Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: notifier_frontend
+    restart: always
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks:
+      - notifier_network
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  notifier_network:
+    driver: bridge
